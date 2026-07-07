@@ -11,10 +11,6 @@ Modern, responsive web UI for recognizing handwritten digits (MNIST) and English
 ## Running Locally
 
 ```bash
-# From project root
-./run.sh
-
-# Or manually
 python -m http.server 8080 --directory docs
 ```
 
@@ -36,7 +32,7 @@ The API URL auto-detects `localhost` when served locally.
 ## Features
 
 - Model selection (Digit / Character)
-- **Three input methods:** canvas, upload, camera (one active at a time)
+- **Two input methods:** upload and camera (one active at a time)
 - Camera center-crop guide and square capture region
 - **Top-3 predictions** and **28×28 preprocessed preview**
 - **Low-confidence warnings** (&lt; 70%)

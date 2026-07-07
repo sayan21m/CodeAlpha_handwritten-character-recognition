@@ -1,188 +1,69 @@
 # Handwritten Character Recognition System
 
-**CodeAlpha Internship Project**
+Clean and simple project structure with three main parts:
 
-A full-stack deep learning application that recognizes handwritten **digits (0–9)** and **English letters (A–Z)** using Convolutional Neural Networks (CNNs).
-
-## Architecture
-
-```mermaid
-flowchart LR
-    A[User Input] --> B[Frontend docs/]
-    B -->|JSON / multipart| C[Flask API backend/]
-    C --> D[preprocess.py]
-    D --> E[CNN Model]
-    E --> F[Prediction JSON]
-    F --> B
-```
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | HTML, CSS, Vanilla JavaScript |
-| Backend | Python 3.11+, Flask |
-| ML | TensorFlow/Keras, OpenCV, NumPy |
-| Datasets | MNIST, EMNIST Letters |
+- `analysis/` - Jupyter notebooks for training and experimentation
+- `backend/` - Flask API for inference
+- `docs/` - frontend (HTML/CSS/Vanilla JS)
 
 ## Project Structure
 
-```
+```text
 handwritten_character_recognition/
-├── analysis/              # Jupyter notebooks (exploration & evaluation)
-│   ├── model_1.ipynb      # MNIST digit CNN
-│   └── model_2.ipynb      # EMNIST letters CNN
-├── backend/               # Flask API & training scripts
+├── analysis/
+│   ├── model_1.ipynb
+│   └── model_2.ipynb
+├── backend/
 │   ├── app.py
 │   ├── model.py
 │   ├── preprocess.py
 │   ├── predict.py
-│   ├── train.py           # Wrapper: --model digit|character|both
-│   ├── train_digit.py
-│   ├── train_character.py
-│   ├── training_utils.py
 │   ├── requirements.txt
-│   ├── tests/
 │   └── saved_models/
-├── docs/                  # Frontend web application
-├── screenshots/           # Demo images (add your own)
-├── run.sh                 # Start backend + frontend
-└── requirements-analysis.txt
+└── docs/
 ```
 
-## Quick Start
-
-### 1. Install dependencies (Python 3.11+)
+## Run Backend
 
 ```bash
 cd backend
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+python app.py
 ```
 
-### 2. Train models
+Backend URL: `http://localhost:5000`
+
+## Run Frontend
 
 ```bash
-# Train both models
-python train.py --model both
-
-# Or individually
-python train_digit.py
-python train_character.py
-```
-
-Models are saved to `backend/saved_models/`:
-- `digit_model.keras`
-- `character_model.keras`
-
-> Legacy notebook filenames (`mnist_cnn.keras`, `emnist_cnn.keras`) are also supported.
-
-### 3. Run the application
-
-**Option A — one command:**
-
-```bash
-chmod +x run.sh
-./run.sh
-```
-
-**Option B — separate terminals:**
-
-```bash
-# Terminal 1 — API
-cd backend && python app.py
-
-# Terminal 2 — Frontend
 python -m http.server 8080 --directory docs
 ```
 
-- Frontend: http://localhost:8080  
-- API: http://localhost:5000  
+Frontend URL: `http://localhost:8080`
 
-### 4. Run tests
+## Models
 
-```bash
-cd backend
-pytest tests/ -v
-```
+## Model Source
+
+- Training happens in `analysis/` notebooks only.
+- `backend/` is inference-only and does not train models.
+
+
+Put pretrained models in `backend/saved_models/`:
+
+- `digit_model.keras`
+- `character_model.keras`
+
+Legacy names are also supported:
+
+- `mnist_cnn.keras`
+- `emnist_cnn.keras`
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Service status |
-| GET | `/health` | Health + model availability |
-| POST | `/predict-digit` | Digit prediction |
-| POST | `/predict-character` | Letter prediction |
-
-### Example request (JSON)
-
-```bash
-curl -X POST http://localhost:5000/predict-digit \
-  -H "Content-Type: application/json" \
-  -d '{"image": "data:image/png;base64,...", "input_source": "canvas"}'
-```
-
-### Example response
-
-```json
-{
-  "prediction": "7",
-  "confidence": 99.21,
-  "inference_time": "10 ms",
-  "inference_time_ms": 10,
-  "input_source": "canvas",
-  "top_predictions": [
-    {"label": "7", "confidence": 99.21},
-    {"label": "1", "confidence": 0.45}
-  ],
-  "preprocessed_preview": "data:image/png;base64,...",
-  "low_confidence": false
-}
-```
-
-## Features
-
-- **Three input methods:** canvas drawing, image upload, camera capture
-- **MNIST-style preprocessing:** centering, padding, grayscale, 28×28 resize
-- **Top-3 predictions** and **28×28 model input preview** in the UI
-- **Low-confidence warnings** when prediction confidence &lt; 70%
-- **Independent model loading** — one model can work without the other
-
-## Screenshots
-
-Add demo screenshots to the [`screenshots/`](screenshots/) folder for your portfolio README.
-
-Suggested captures:
-- Home page / hero section
-- Digit prediction on canvas
-- Character prediction with top-3 results
-- Camera capture workflow
-- 28×28 preprocessed preview panel
-
-
-## Deployment (Render + GitHub Pages)
-
-- Backend (Render): `https://codealpha-handwritten-character-3jhq.onrender.com`
-- Frontend (GitHub Pages): `https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition/`
-
-### Render settings
-
-- **Environment:** Python
-- **Build command:** `pip install -r backend/requirements.txt`
-- **Start command:** `cd backend && gunicorn app:app`
-- **Runtime:** pinned via `runtime.txt` (`python-3.11.9`) to keep TensorFlow compatible
-
-If your frontend domain changes, set `CORS_ORIGINS` in Render to a comma-separated list of allowed origins.
-
-## Analysis Notebooks
-
-```bash
-pip install -r requirements-analysis.txt
-jupyter notebook analysis/
-```
-
-Notebooks use the same architectures defined in `backend/model.py`.
-
-## License
-
-CodeAlpha Internship Project.
+- `GET /`
+- `GET /health`
+- `POST /predict-digit`
+- `POST /predict-character`

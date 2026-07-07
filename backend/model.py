@@ -92,8 +92,8 @@ def resolve_model_path(path: str) -> str:
         return fallback
 
     raise FileNotFoundError(
-        f"Trained model not found at {path}. "
-        f"Run train_digit.py / train_character.py or train.py first."
+        f"Pretrained model not found at {path}. "
+        f"Add digit_model.keras or character_model.keras to backend/saved_models/."
     )
 
 

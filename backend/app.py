@@ -23,7 +23,6 @@ app = Flask(__name__)
 
 DEFAULT_ALLOWED_ORIGINS = [
     "https://sayan21m.github.io",
-    "https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition",
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
@@ -120,7 +119,7 @@ def health():
 def predict_digit_endpoint():
     """Predict a handwritten digit from an uploaded or JSON-encoded image."""
     if not model_is_available(DIGIT_MODEL_PATH):
-        return jsonify({"error": "Digit model is not available. Train it first."}), 503
+        return jsonify({"error": "Digit pretrained model is not available. Add digit_model.keras to backend/saved_models/."}), 503
 
     image_source = extract_image_from_request()
     if image_source is None:
@@ -144,7 +143,7 @@ def predict_character_endpoint():
     """Predict a handwritten character from an uploaded or JSON-encoded image."""
     if not model_is_available(CHARACTER_MODEL_PATH):
         return jsonify(
-            {"error": "Character model is not available. Train it first."}
+            {"error": "Character pretrained model is not available. Add character_model.keras to backend/saved_models/."}
         ), 503
 
     image_source = extract_image_from_request()

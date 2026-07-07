@@ -1,6 +1,6 @@
 /**
  * Handwritten Character Recognition — Frontend
- * Model selection, canvas drawing, upload, camera capture, API integration
+ * Model selection, image upload, camera capture, API integration
  */
 
 /* --------------------------------------------------------------------------
@@ -19,15 +19,11 @@ const MODEL_LABELS = {
 };
 
 const INPUT_LABELS = {
-  canvas: "Canvas",
   upload: "Upload",
   camera: "Camera",
 };
 
 const CANVAS_SIZE = 280;
-const MNIST_SIZE = 28;
-// Scale stroke width relative to MNIST proportions on the drawing canvas
-const STROKE_WIDTH = Math.max(12, Math.round((CANVAS_SIZE / MNIST_SIZE) * 2));
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/jpg"];
 
 /* --------------------------------------------------------------------------
@@ -35,9 +31,7 @@ const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/jpg"];
    -------------------------------------------------------------------------- */
 const state = {
   activeModel: "digit",
-  activeInput: "canvas",
-  isDrawing: false,
-  undoStack: [],
+  activeInput: "upload",
   uploadedImage: null,
   capturedImage: null,
   cameraStream: null,
@@ -50,7 +44,7 @@ const state = {
 /* --------------------------------------------------------------------------
    DOM references
    -------------------------------------------------------------------------- */
-const canvas = document.getElementById("drawing-canvas");
+const canvas = document.getElementById("processing-canvas");
 const ctx = canvas.getContext("2d");
 const modelCards = document.querySelectorAll(".model-card");
 const inputTabs = document.querySelectorAll(".input-tab");
@@ -58,8 +52,6 @@ const inputPanels = document.querySelectorAll(".input-panel");
 const activeModelLabel = document.getElementById("active-model-label");
 const modelValue = document.getElementById("model-value");
 const inputSourceValue = document.getElementById("input-source-value");
-const clearBtn = document.getElementById("clear-btn");
-const undoBtn = document.getElementById("undo-btn");
 const predictBtn = document.getElementById("predict-btn");
 const uploadZone = document.getElementById("upload-zone");
 const fileInput = document.getElementById("file-input");
@@ -101,12 +93,11 @@ function init() {
   setupCanvas();
   setupModelSelection();
   setupInputMethods();
-  setupDrawing();
-  setupToolbar();
   setupUpload();
   setupCamera();
   selectModel("digit");
-  switchInputMethod("canvas", false);
+  switchInputMethod("upload", false);
+  predictBtn.addEventListener("click", handlePredict);
 }
 
 /* --------------------------------------------------------------------------
@@ -151,22 +142,19 @@ function switchInputMethod(method, showNotification = true) {
 }
 
 function clearCurrentInput(previousMethod) {
-  if (previousMethod === "canvas") {
-    clearCanvas(false);
-    state.undoStack = [];
-  } else if (previousMethod === "upload") {
+  if (previousMethod === "upload") {
     state.uploadedImage = null;
     uploadPreviewCard.classList.add("hidden");
     uploadPreview.src = "";
     fileInput.value = "";
-    clearCanvas(false);
+    clearCanvas();
   } else if (previousMethod === "camera") {
     stopCameraStream();
     resetCameraUI();
     state.capturedImage = null;
     cameraPreviewCard.classList.add("hidden");
     cameraCapturedPreview.src = "";
-    clearCanvas(false);
+    clearCanvas();
   }
 }
 
@@ -184,18 +172,15 @@ function resetPredictionResults() {
 }
 
 /* --------------------------------------------------------------------------
-   Canvas
+   Processing canvas (hidden — used for upload/camera image prep)
    -------------------------------------------------------------------------- */
 function setupCanvas() {
   canvas.width = CANVAS_SIZE;
   canvas.height = CANVAS_SIZE;
-  clearCanvas(false);
+  clearCanvas();
 }
 
-function clearCanvas(saveUndo = true) {
-  if (saveUndo && hasCanvasContent()) {
-    saveUndoState();
-  }
+function clearCanvas() {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 }
@@ -208,79 +193,6 @@ function hasCanvasContent() {
     }
   }
   return false;
-}
-
-function saveUndoState() {
-  state.undoStack.push(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
-  if (state.undoStack.length > 20) state.undoStack.shift();
-}
-
-function undoStroke() {
-  if (state.undoStack.length === 0) {
-    showToast("Nothing to undo.", "info");
-    return;
-  }
-  ctx.putImageData(state.undoStack.pop(), 0, 0);
-}
-
-/* --------------------------------------------------------------------------
-   Drawing
-   -------------------------------------------------------------------------- */
-function setupDrawing() {
-  canvas.addEventListener("mousedown", startDrawing);
-  canvas.addEventListener("mousemove", draw);
-  canvas.addEventListener("mouseup", endDrawing);
-  canvas.addEventListener("mouseleave", endDrawing);
-  canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-  canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-  canvas.addEventListener("touchend", endDrawing);
-}
-
-function getPointerPosition(event) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const clientX = event.clientX ?? event.touches?.[0]?.clientX;
-  const clientY = event.clientY ?? event.touches?.[0]?.clientY;
-  return {
-    x: (clientX - rect.left) * scaleX,
-    y: (clientY - rect.top) * scaleY,
-  };
-}
-
-function startDrawing(event) {
-  if (state.activeInput !== "canvas") return;
-  event.preventDefault();
-  saveUndoState();
-  resetPredictionResults();
-  state.isDrawing = true;
-  const pos = getPointerPosition(event);
-  ctx.beginPath();
-  ctx.moveTo(pos.x, pos.y);
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = STROKE_WIDTH;
-}
-
-function draw(event) {
-  if (!state.isDrawing) return;
-  event.preventDefault();
-  const pos = getPointerPosition(event);
-  ctx.lineTo(pos.x, pos.y);
-  ctx.stroke();
-}
-
-function endDrawing() {
-  state.isDrawing = false;
-}
-
-function handleTouchStart(event) {
-  startDrawing(event);
-}
-
-function handleTouchMove(event) {
-  draw(event);
 }
 
 /* --------------------------------------------------------------------------
@@ -316,20 +228,6 @@ function selectModel(model) {
   if (changed) {
     showToast(`${MODEL_LABELS[model]} selected.`, "info");
   }
-}
-
-/* --------------------------------------------------------------------------
-   Toolbar
-   -------------------------------------------------------------------------- */
-function setupToolbar() {
-  clearBtn.addEventListener("click", () => {
-    clearCanvas(false);
-    state.undoStack = [];
-    resetPredictionResults();
-    showToast("Canvas cleared.", "info");
-  });
-  undoBtn.addEventListener("click", undoStroke);
-  predictBtn.addEventListener("click", handlePredict);
 }
 
 /* --------------------------------------------------------------------------
@@ -395,7 +293,7 @@ function processFile(file) {
 }
 
 function drawImageToCanvas(img) {
-  clearCanvas(false);
+  clearCanvas();
   const scale = Math.min(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
   const width = img.width * scale;
   const height = img.height * scale;
@@ -606,7 +504,7 @@ function retakePhoto() {
   state.capturedImage = null;
   cameraPreviewCard.classList.add("hidden");
   cameraCapturedPreview.src = "";
-  clearCanvas(false);
+  clearCanvas();
   resetPredictionResults();
   state.cameraCaptured = false;
   startCamera();
@@ -619,7 +517,7 @@ function closeCamera() {
   state.cameraCaptured = false;
   cameraPreviewCard.classList.add("hidden");
   cameraCapturedPreview.src = "";
-  clearCanvas(false);
+  clearCanvas();
   resetPredictionResults();
   showToast("Camera closed.", "info");
 }
@@ -678,7 +576,6 @@ function hideCameraError() {
    Prediction & API
    -------------------------------------------------------------------------- */
 function hasActiveInput() {
-  if (state.activeInput === "canvas") return hasCanvasContent();
   if (state.activeInput === "upload") return state.uploadedImage !== null && hasCanvasContent();
   if (state.activeInput === "camera") return state.capturedImage !== null && hasCanvasContent();
   return false;
@@ -687,7 +584,6 @@ function hasActiveInput() {
 async function handlePredict() {
   if (!hasActiveInput()) {
     const hints = {
-      canvas: "Please draw on the canvas first.",
       upload: "Please upload an image first.",
       camera: "Please capture a photo first.",
     };
@@ -737,7 +633,7 @@ async function handlePredict() {
     });
 
     if (data.low_confidence || confidence < CONFIG.LOW_CONFIDENCE_THRESHOLD) {
-      showToast(data.warning || "Low confidence — try redrawing larger and centered.", "error");
+      showToast(data.warning || "Low confidence — try a clearer, centered image.", "error");
     } else {
       showToast("Prediction complete.", "success");
     }

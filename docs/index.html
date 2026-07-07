@@ -36,8 +36,8 @@
           <h1 id="hero-title">Handwritten Character Recognition System</h1>
           <p class="hero-subtitle">
             A deep learning–based web application for recognizing handwritten digits and English letters
-            using Convolutional Neural Networks (CNNs). The system supports drawing on a digital canvas,
-            uploading handwritten images, and capturing photos directly from a camera for real-time inference.
+            using Convolutional Neural Networks (CNNs). Upload handwritten images or capture photos
+            from your camera for real-time inference.
           </p>
         </div>
         <div class="hero-visual" aria-hidden="true">
@@ -89,10 +89,7 @@
 
           <!-- Input method tabs -->
           <div class="input-methods" role="tablist" aria-label="Input method">
-            <button type="button" class="input-tab is-active" role="tab" id="tab-canvas" aria-selected="true" aria-controls="panel-canvas" data-input="canvas">
-              <span aria-hidden="true">✏</span> Draw on Canvas
-            </button>
-            <button type="button" class="input-tab" role="tab" id="tab-upload" aria-selected="false" aria-controls="panel-upload" data-input="upload">
+            <button type="button" class="input-tab is-active" role="tab" id="tab-upload" aria-selected="true" aria-controls="panel-upload" data-input="upload">
               <span aria-hidden="true">📁</span> Upload Image
             </button>
             <button type="button" class="input-tab" role="tab" id="tab-camera" aria-selected="false" aria-controls="panel-camera" data-input="camera">
@@ -100,27 +97,11 @@
             </button>
           </div>
 
-          <!-- Canvas input -->
-          <div id="panel-canvas" class="input-panel is-active" role="tabpanel" aria-labelledby="tab-canvas">
-            <div class="canvas-wrapper">
-              <canvas
-                id="drawing-canvas"
-                width="280"
-                height="280"
-                aria-label="Drawing canvas for handwritten input"
-                role="img"
-              ></canvas>
-              <p class="panel-hint">Draw with mouse or touch</p>
-            </div>
-
-            <div class="toolbar" role="toolbar" aria-label="Canvas controls">
-              <button type="button" class="btn btn-secondary" id="clear-btn">Clear</button>
-              <button type="button" class="btn btn-secondary" id="undo-btn">Undo</button>
-            </div>
-          </div>
+          <!-- Hidden canvas used internally for image processing -->
+          <canvas id="processing-canvas" width="280" height="280" hidden aria-hidden="true"></canvas>
 
           <!-- Upload input -->
-          <div id="panel-upload" class="input-panel hidden" role="tabpanel" aria-labelledby="tab-upload">
+          <div id="panel-upload" class="input-panel is-active" role="tabpanel" aria-labelledby="tab-upload">
             <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="Upload image">
               <input type="file" id="file-input" accept="image/png,image/jpeg,image/jpg" hidden>
               <div class="upload-content">
@@ -206,7 +187,7 @@
               </div>
               <div class="meta-row">
                 <dt>Input Source</dt>
-                <dd id="input-source-value">Canvas</dd>
+                <dd id="input-source-value">Upload</dd>
               </div>
               <div class="meta-row">
                 <dt>Inference</dt>

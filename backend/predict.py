@@ -4,17 +4,10 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 
-from labels import (
-    LOW_CONFIDENCE_THRESHOLD,
-    build_top_predictions,
-    calculate_confidence,
-    index_to_digit,
-    index_to_letter,
-)
 from model import (
     CHARACTER_MODEL_PATH,
     DIGIT_MODEL_PATH,
@@ -23,11 +16,12 @@ from model import (
 )
 from preprocess import preprocess_image_source
 
-if TYPE_CHECKING:
-    import tensorflow as tf
-
 _digit_model: Optional[Any] = None
 _character_model: Optional[Any] = None
+LOW_CONFIDENCE_THRESHOLD = 70.0
+
+DIGITS = [str(i) for i in range(10)]
+LETTERS = [chr(ord("A") + i) for i in range(26)]
 
 
 @dataclass
@@ -94,6 +88,41 @@ def get_model_status() -> dict:
         "digit_model_loaded": _digit_model is not None,
         "character_model_loaded": _character_model is not None,
     }
+
+
+def index_to_digit(class_index: int) -> str:
+    """Convert a class index to a digit label."""
+    if class_index < 0 or class_index >= len(DIGITS):
+        raise ValueError(f"Invalid digit class index: {class_index}")
+    return DIGITS[class_index]
+
+
+def index_to_letter(class_index: int) -> str:
+    """Convert a class index to an uppercase letter label."""
+    if class_index < 0 or class_index >= len(LETTERS):
+        raise ValueError(f"Invalid character class index: {class_index}")
+    return LETTERS[class_index]
+
+
+def calculate_confidence(probabilities: np.ndarray) -> float:
+    """Return the highest softmax probability as a percentage."""
+    return float(np.max(probabilities) * 100.0)
+
+
+def build_top_predictions(
+    probabilities: np.ndarray,
+    label_converter,
+    top_k: int = 3,
+) -> list[dict]:
+    """Build top-k prediction list with labels and confidence scores."""
+    indices = np.argsort(probabilities)[::-1][:top_k]
+    return [
+        {
+            "label": label_converter(int(index)),
+            "confidence": round(float(probabilities[index] * 100.0), 2),
+        }
+        for index in indices
+    ]
 
 
 def _run_inference(model: Any, tensor: np.ndarray) -> np.ndarray:
