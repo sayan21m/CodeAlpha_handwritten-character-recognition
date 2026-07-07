@@ -13,8 +13,8 @@ venv/
 env/
 
 # Models & data (large files — train locally)
-backend/saved_models/*.keras
 backend/saved_models/*.png
+backend/saved_models/*.h5
 
 # IDE
 .idea/
@@ -35,3 +35,7 @@ Thumbs.db
 # Environment
 .env
 .env.*
+
+# Keep deployed inference models
+!backend/saved_models/digit_model.keras
+!backend/saved_models/character_model.keras
