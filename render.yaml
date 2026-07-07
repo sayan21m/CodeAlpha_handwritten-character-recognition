@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: codealpha-handwritten-character-recognition
+    env: python
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && gunicorn app:app
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://sayan21m.github.io,https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition

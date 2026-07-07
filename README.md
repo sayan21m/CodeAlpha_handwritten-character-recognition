@@ -159,6 +159,21 @@ Suggested captures:
 - Camera capture workflow
 - 28×28 preprocessed preview panel
 
+
+## Deployment (Render + GitHub Pages)
+
+- Backend (Render): `https://codealpha-handwritten-character-3jhq.onrender.com`
+- Frontend (GitHub Pages): `https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition/`
+
+### Render settings
+
+- **Environment:** Python
+- **Build command:** `pip install -r backend/requirements.txt`
+- **Start command:** `cd backend && gunicorn app:app`
+- **Runtime:** pinned via `runtime.txt` (`python-3.11.9`) to keep TensorFlow compatible
+
+If your frontend domain changes, set `CORS_ORIGINS` in Render to a comma-separated list of allowed origins.
+
 ## Analysis Notebooks
 
 ```bash

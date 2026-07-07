@@ -20,7 +20,21 @@ from predict import (
 )
 
 app = Flask(__name__)
-CORS(app)
+
+DEFAULT_ALLOWED_ORIGINS = [
+    "https://sayan21m.github.io",
+    "https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+]
+
+raw_origins = os.environ.get("CORS_ORIGINS", "")
+if raw_origins.strip():
+    allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+else:
+    allowed_origins = DEFAULT_ALLOWED_ORIGINS
+
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
 
 PROJECT_NAME = "Handwritten Character Recognition"
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
