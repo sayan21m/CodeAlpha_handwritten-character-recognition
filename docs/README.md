@@ -50,3 +50,9 @@ See the root [README.md](../README.md) for full API documentation.
 ## License
 
 CodeAlpha Internship Project.
+
+
+## Live URLs
+
+- Frontend: https://sayan21m.github.io/CodeAlpha_handwritten-character-recognition/
+- Backend API: https://codealpha-handwritten-character-3jhq.onrender.com

@@ -6,7 +6,7 @@
 /* --------------------------------------------------------------------------
    Configuration (see config.js)
    -------------------------------------------------------------------------- */
-const CONFIG = window.HCR_CONFIG || { API_BASE_URL: "http://localhost:5000", LOW_CONFIDENCE_THRESHOLD: 70 };
+const CONFIG = window.HCR_CONFIG || { API_BASE_URL: "https://codealpha-handwritten-character-3jhq.onrender.com", LOW_CONFIDENCE_THRESHOLD: 70 };
 const API_BASE_URL = CONFIG.API_BASE_URL;
 const API_ENDPOINTS = {
   digit: `${API_BASE_URL}/predict-digit`,
