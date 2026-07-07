@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A deep learning web application for recognizing handwritten digits and English letters using CNNs.">
+  <title>Handwritten Character Recognition System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <img src="assets/logo/logo.svg" alt="" class="brand-logo" width="40" height="40">
+        <span class="brand-name">HCR System</span>
+      </div>
+      <nav class="header-nav" aria-label="Primary">
+        <a href="#models">Models</a>
+        <a href="#workspace">Workspace</a>
+        <a href="#results">Results</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">CodeAlpha Internship Project</p>
+          <h1 id="hero-title">Handwritten Character Recognition System</h1>
+          <p class="hero-subtitle">
+            A deep learning–based web application for recognizing handwritten digits and English letters
+            using Convolutional Neural Networks (CNNs). The system supports drawing on a digital canvas,
+            uploading handwritten images, and capturing photos directly from a camera for real-time inference.
+          </p>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-card">
+            <img src="assets/logo/logo.svg" alt="" width="88" height="88">
+            <div class="hero-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Model Selection -->
+    <section id="models" class="section" aria-labelledby="models-title">
+      <div class="container">
+        <div class="section-heading">
+          <h2 id="models-title">Choose a Model</h2>
+          <p>Select one model before providing handwritten input.</p>
+        </div>
+
+        <div class="model-grid" role="radiogroup" aria-label="Recognition model">
+          <article class="model-card" data-model="digit" tabindex="0" role="radio" aria-checked="true">
+            <div class="model-icon" aria-hidden="true">📱</div>
+            <h3>Digit Recognition</h3>
+            <p>Recognizes handwritten numbers from 0–9 using a CNN trained on MNIST.</p>
+            <button type="button" class="btn btn-outline model-select-btn">Use Digit Model</button>
+          </article>
+
+          <article class="model-card" data-model="character" tabindex="0" role="radio" aria-checked="false">
+            <div class="model-icon" aria-hidden="true">🔤</div>
+            <h3>Character Recognition</h3>
+            <p>Recognizes handwritten English letters using a CNN trained on EMNIST Letters.</p>
+            <button type="button" class="btn btn-outline model-select-btn">Use Character Model</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workspace -->
+    <section id="workspace" class="section section-muted" aria-labelledby="workspace-title">
+      <div class="container workspace-grid">
+        <div class="workspace-panel">
+          <div class="panel-header">
+            <h2 id="workspace-title">Provide Input</h2>
+            <p class="active-model-label">
+              Active model:
+              <strong id="active-model-label">Digit Recognition</strong>
+            </p>
+          </div>
+
+          <!-- Input method tabs -->
+          <div class="input-methods" role="tablist" aria-label="Input method">
+            <button type="button" class="input-tab is-active" role="tab" id="tab-canvas" aria-selected="true" aria-controls="panel-canvas" data-input="canvas">
+              <span aria-hidden="true">✏</span> Draw on Canvas
+            </button>
+            <button type="button" class="input-tab" role="tab" id="tab-upload" aria-selected="false" aria-controls="panel-upload" data-input="upload">
+              <span aria-hidden="true">📁</span> Upload Image
+            </button>
+            <button type="button" class="input-tab" role="tab" id="tab-camera" aria-selected="false" aria-controls="panel-camera" data-input="camera">
+              <span aria-hidden="true">📷</span> Take Picture
+            </button>
+          </div>
+
+          <!-- Canvas input -->
+          <div id="panel-canvas" class="input-panel is-active" role="tabpanel" aria-labelledby="tab-canvas">
+            <div class="canvas-wrapper">
+              <canvas
+                id="drawing-canvas"
+                width="280"
+                height="280"
+                aria-label="Drawing canvas for handwritten input"
+                role="img"
+              ></canvas>
+              <p class="panel-hint">Draw with mouse or touch</p>
+            </div>
+
+            <div class="toolbar" role="toolbar" aria-label="Canvas controls">
+              <button type="button" class="btn btn-secondary" id="clear-btn">Clear</button>
+              <button type="button" class="btn btn-secondary" id="undo-btn">Undo</button>
+            </div>
+          </div>
+
+          <!-- Upload input -->
+          <div id="panel-upload" class="input-panel hidden" role="tabpanel" aria-labelledby="tab-upload">
+            <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="Upload image">
+              <input type="file" id="file-input" accept="image/png,image/jpeg,image/jpg" hidden>
+              <div class="upload-content">
+                <div class="upload-icon" aria-hidden="true">⬆</div>
+                <p><strong>Upload an image</strong></p>
+                <p class="upload-meta">PNG, JPG, or JPEG — drag &amp; drop supported</p>
+              </div>
+            </div>
+
+            <div class="preview-card hidden" id="upload-preview-card" aria-live="polite">
+              <img id="upload-preview" alt="Uploaded handwriting preview">
+              <p class="preview-caption">Uploaded image preview</p>
+            </div>
+          </div>
+
+          <!-- Camera input -->
+          <div id="panel-camera" class="input-panel hidden" role="tabpanel" aria-labelledby="tab-camera">
+            <div class="camera-frame" id="camera-frame">
+              <video id="camera-preview" class="camera-video" autoplay playsinline muted aria-label="Live camera preview"></video>
+
+              <div class="camera-loading hidden" id="camera-loading" role="status" aria-live="polite">
+                <div class="spinner spinner-sm" aria-hidden="true"></div>
+                <p>Starting camera…</p>
+              </div>
+
+              <div class="camera-error hidden" id="camera-error" role="alert">
+                <p id="camera-error-text">Camera not available.</p>
+              </div>
+
+              <div class="camera-placeholder" id="camera-placeholder">
+                <span aria-hidden="true">📷</span>
+                <p>Camera preview will appear here</p>
+              </div>
+              <div class="camera-crop-guide" id="camera-crop-guide" aria-hidden="true">
+                <span>Center character here</span>
+              </div>
+            </div>
+
+            <div class="camera-switch hidden" id="camera-switch-wrap">
+              <label for="camera-select">Camera</label>
+              <select id="camera-select" class="camera-select" aria-label="Select camera"></select>
+            </div>
+
+            <div class="camera-controls" role="toolbar" aria-label="Camera controls">
+              <button type="button" class="btn btn-primary" id="start-camera-btn">Start Camera</button>
+              <button type="button" class="btn btn-primary hidden" id="capture-btn">Capture</button>
+              <button type="button" class="btn btn-secondary hidden" id="retake-btn">Retake</button>
+              <button type="button" class="btn btn-secondary hidden" id="close-camera-btn">Close Camera</button>
+            </div>
+
+            <div class="preview-card hidden" id="camera-preview-card" aria-live="polite">
+              <img id="camera-captured-preview" alt="Captured handwriting preview">
+              <p class="preview-caption">Captured image preview — ready for prediction</p>
+            </div>
+          </div>
+
+          <!-- Shared predict button -->
+          <div class="predict-row">
+            <button type="button" class="btn btn-primary btn-predict" id="predict-btn">Predict</button>
+          </div>
+        </div>
+
+        <!-- Prediction -->
+        <aside id="results" class="prediction-panel" aria-labelledby="prediction-title">
+          <h2 id="prediction-title">Prediction</h2>
+
+          <div class="prediction-card" id="prediction-card">
+            <div class="prediction-main">
+              <span class="prediction-label">Prediction</span>
+              <span class="prediction-value" id="prediction-value">—</span>
+            </div>
+
+            <p class="confidence-warning hidden" id="confidence-warning" role="alert"></p>
+
+            <dl class="prediction-meta">
+              <div class="meta-row">
+                <dt>Confidence</dt>
+                <dd><span id="confidence-value">0</span>%</dd>
+              </div>
+              <div class="meta-row">
+                <dt>Model</dt>
+                <dd id="model-value">Digit Recognition</dd>
+              </div>
+              <div class="meta-row">
+                <dt>Input Source</dt>
+                <dd id="input-source-value">Canvas</dd>
+              </div>
+              <div class="meta-row">
+                <dt>Inference</dt>
+                <dd><span id="inference-value">0</span> ms</dd>
+              </div>
+            </dl>
+
+            <div class="top-predictions hidden" id="top-predictions">
+              <h3>Top Predictions</h3>
+              <ol id="top-predictions-list"></ol>
+            </div>
+
+            <div class="preprocessed-preview hidden" id="preprocessed-preview-card">
+              <h3>Model Input (28×28)</h3>
+              <img id="preprocessed-preview" alt="Preprocessed 28 by 28 grayscale preview">
+              <p class="preview-caption">Centered grayscale image sent to the CNN</p>
+            </div>
+
+            <p class="prediction-placeholder" id="prediction-placeholder">
+              Select a model, choose an input method, provide handwriting, then click Predict.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-title">Built with</p>
+      <ul class="footer-tags">
+        <li>HTML</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>Python</li>
+        <li>Flask</li>
+        <li>TensorFlow</li>
+        <li>MNIST</li>
+        <li>EMNIST</li>
+      </ul>
+      <p class="footer-note">CodeAlpha Internship Project</p>
+    </div>
+  </footer>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay hidden" id="loading-overlay" role="status" aria-live="polite" aria-busy="false">
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="loading-message">Running inference…</p>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
